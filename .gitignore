@@ -1,0 +1,9 @@
+.env
+API-KEYS.local.md
+browser-profile/*
+!browser-profile/.gitkeep
+jobs/*
+!jobs/.gitkeep
+tools/selectors.json
+__pycache__/
+*.pyc

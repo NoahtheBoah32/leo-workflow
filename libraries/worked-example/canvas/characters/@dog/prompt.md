@@ -1,0 +1,9 @@
+# @dog
+```
+Character reference sheet of one real dog, photographed in a single continuous studio session, laid out as a 16:9 sheet of five panels separated by thin clean gaps; the sheet carries no lettering. The same individual dog in every panel: a scruffy small-to-medium terrier mix, about knee height to an adult, wiry grey coat with a lighter silver muzzle, bushy eyebrows and a shaggy beard, his own left ear standing up and his own right ear folded over, dark brown eyes, black nose, a slightly crooked tail carried high. He wears a blue cotton bandana knotted at the back of the neck. Friendly, goofy energy: mouth open in a happy pant, tongue just showing. Panel 1: close-up of the face straight to camera. Panel 2: full body in left profile, standing. Panel 3: full body facing camera, sitting; the upright ear on the viewer's right. Panel 4: full body from behind, bandana knot visible. Panel 5: full body in left profile mid-gallop, all four paws off the floor, ears flying, delighted rather than aggressive. Seamless mid-grey studio backdrop with a soft floor-to-wall falloff and a faint scuff near the floor line. Large soft key from camera-left with gentle fill, neutral 5200K white balance, soft contact shadows. Real wiry fur with coarse individual hairs and flyaways, wet nose shine, natural canine proportions. Warm colour-negative film character: soft warm highlights that roll off gently, fine even grain in the midtones and shadows, forgiving mid-contrast, slightly lifted blacks.
+```
+```
+snarling, bared teeth, aggressive, cartoon, anthropomorphic, plush toy, 3d render, CGI, illustration, over-smoothed fur, extra legs, malformed paws, second dog, both ears upright, text, labels, watermark, crushed black shadows, neon magenta, teal-and-orange grade
+```
+
+Source: ../../asset-prompts.md · Ground rules: ../../../ground-rules.md
