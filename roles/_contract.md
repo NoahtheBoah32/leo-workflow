@@ -49,7 +49,7 @@ folder, a target, and a CONTEXT block. Read this file, then your role file, then
 
 Final report to the main agent, in this order, short:
 
-1. Output path(s).
+1. Output path(s), as full Windows paths (`C:\...`), so the main agent can relay them unchanged.
 2. The prompt you actually sent (the file path is enough if it is unchanged from the plan;
    paste the diff if you changed it, and say why).
 3. Three checks you ran on the result and what each found.

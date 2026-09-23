@@ -24,6 +24,21 @@ brief ──► PLAN (files the user can edit) ──► OKAY
 
 ---
 
+## 0.0 Paths in the chat: always the full Windows path
+
+Every file or folder you mention to the user is written as a full Windows path, backslashes,
+drive letter first, exactly as it can be pasted into the Explorer address bar:
+
+```
+C:\Users\User\Documents\AANG V2\NEUTRA AUTOMATION\Leo Workflow\jobs\2026-09-22-clinic\plan\character-01-doctor.prompt.txt
+```
+
+Never a relative path (`plan/character-01-doctor.prompt.txt`), never forward slashes, never
+`jobs/<job>/...` shorthand in a message meant for the user. Relative paths are fine inside
+spawn prompts and files. The PLAN message, every GATE message and every "done" line carry
+the full paths. Resolve them from the folder this session runs in. The examples further
+down this file use short paths only to fit the page; you write the real ones.
+
 ## 0. Tools you use
 
 | Need | Tool | Notes |
