@@ -63,6 +63,28 @@ Shape in `PROMPT-STRUCTURES.md` §4. The rules that matter most:
 
 Save it. Report the path and stop.
 
+## Before any regeneration: does the defect live in a sheet?
+
+GPT Image 2 follows the attached reference over the prompt. If your still shows a
+character, prop or room differently from what the plan requires, look at the approved sheet
+first. If the sheet shows the same wrong thing, or does not show the required feature
+clearly, **stop**. Do not reroll, do not add prompt lines to argue with the reference.
+Report in this exact form and wait:
+
+```
+SHEET DEFECT · character-01-waffles · the notch is not visible on the sheet's right ear;
+the still cannot show what the reference does not carry. Recommend: redo the sheet with a
+close-up panel of the right ear, then regenerate the still.
+```
+
+The main agent routes it to the sheet agent. You regenerate only after a new approved sheet
+arrives with a new `GO`. Two rerolls of the same defect is the hard limit; after the
+second, report SHEET DEFECT whatever the prompt says.
+
+Defects that are yours to fix in the still: blocking, framing, camera height, the count of
+people, an extra or missing tagged object, light direction, lettering that appeared, the
+sash state, screen direction. Those you fix by editing the prompt and rerolling on `GO`.
+
 ## Step: `GO still`
 
 ```

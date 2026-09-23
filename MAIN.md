@@ -337,6 +337,45 @@ Once the answer names a thing, route it per 4.2. If the user says "just try agai
 specifics, run one reroll with the same prompt and a new seed, say that is what you did,
 and count it against the reroll budget.
 
+### 4.3b The sheet is the source. Fix the sheet, never the frame.
+
+GPT Image 2 obeys the reference image over the prompt text. What a sheet shows is what
+every still and clip will show, and a prompt line cannot argue with it. A grey sweater on
+the sheet stays grey however many times the still prompt says orange. A notch that is not
+clearly visible on the sheet does not exist.
+
+So:
+
+1. **Diagnose before routing.** When a still or an end frame has a defect, ask first: does
+   this defect live in a sheet? Identity, marks, wardrobe, colour, a prop's shape, a room's
+   architecture, a state such as wet or torn: those live in sheets. If yes, the still is not
+   the thing to fix. Send the note to the **sheet** agent, un-approve that sheet in
+   `STATUS.md`, and put the scene on BLOCKED until the sheet is re-approved. Then the scene
+   agent regenerates the still with the new sheet attached. Never send the scene agent a
+   note about something a sheet controls.
+2. **Two strikes on the same defect in a still means it is not the still.** If the same
+   thing is wrong twice in a row, stop rerolling the still, whatever the prompt says. Go
+   to the sheet.
+3. **A sheet is approved against the registry, item by item.** Before you put a sheet at a
+   gate, and before you mark it APPROVED, check every lock in `plan/characters.md` (or
+   environments, elements) against the image: which ear, which paw, which hand, the colour,
+   the wardrobe, the state. A lock that the image does not show clearly, or shows on the
+   wrong side, fails the sheet. Say so at the gate: `FAILS LOCK: notch on his own right
+   ear, image shows it on the left`. Do not approve a sheet hoping to fix it in the scene.
+4. **Small features get their own panel.** If a lock is a small detail (a notch, a mole, a
+   scar, a logo-free label, a bell), the sheet prompt gets a close-up panel of exactly that
+   detail, so the reference carries it at a size the model can read. Tell the sheet agent
+   to add the panel.
+5. **A change of look is a new sheet, never an edit request.** Orange sweater, wet fur, coat
+   off: `character-03-<handle>_<state>`, generated from the base sheet as reference with the
+   one change stated, and approved on its own. Never ask a still to make the change.
+6. **The default answer to "fix it in the still" is no**, unless the defect is one the
+   sheets do not control: framing, blocking, the count of people, an extra object, light
+   direction, lettering that appeared. Those go to the scene agent.
+
+The cost of this rule is one sheet reroll. The cost of ignoring it is every still and
+clip that character is in.
+
 ### 4.4 Reroll budget
 
 Track rerolls per item in `STATUS.md`. When an item hits the budget from the ground rules,

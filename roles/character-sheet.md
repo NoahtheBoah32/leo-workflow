@@ -37,6 +37,13 @@ Read `roles/_contract.md` first. Then `PROMPT-STRUCTURES.md` §1.
    ```
    3:2 for a six-panel sheet, 16:9 for a three-panel sheet. 1K keeps it near one minute.
    The tool writes `sheets/<target>/vN.png` and the log row.
+   **Small locks get a close-up panel.** Before generating, read the registry entry for this
+   character. Every small distinguishing feature (a notch, a mole, a scar, a sock, a bell)
+   that the scene must show gets its own tight panel in the sheet, named with the side as
+   the subject's own left or right: "Panel 5: close-up of his own right ear, the small
+   V-notch in the tip clearly visible". If the plan prompt lacks that panel, add it and say
+   so in the report. A feature the sheet does not show at readable size will not appear
+   in any scene, and no scene prompt can add it later.
 5. Look at the image (Read the PNG). Run these checks and write them to `report.md`:
    - **Identity holds**: same face in every panel, same marks on the same side.
    - **Wardrobe matches the prompt**: fabric, colour, condition, nothing added.
