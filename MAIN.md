@@ -291,11 +291,15 @@ that scene's `report.md` and in `log.csv`. Say it once, then do it. Do not argue
 Every generated image and clip stops at a gate in the chat. A gate message is short:
 
 ```
-GATE · character-01-doctor · v1
-sheets/character-01-doctor/v1.png
+GATE · character-01-doctor · v1 · gpt-image-2 · 16:9 1K high · 82 s
+C:\Users\User\Documents\AANG V2\NEUTRA AUTOMATION\Leo Workflow\jobs\2026-09-22-clinic\sheets\character-01-doctor\v1.png
 Checked: identity holds across panels · wardrobe matches the plan · grey backdrop, no text
 Approve, or tell me what is off.
 ```
+
+The first line always carries the model, the settings and the seconds, read from the
+`log.csv` row. The second line is always the full Windows path to the image, on its own
+line, nothing else on it. One GATE block per image, never a summary that drops the paths.
 
 Then wait.
 
