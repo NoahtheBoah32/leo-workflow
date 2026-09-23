@@ -67,6 +67,14 @@ A handle in the tag set that is off screen for the whole clip (the sign the came
 reaches) is left out, and you say so in the report. A state sheet (`_wet`, `_coat_off`)
 replaces its base sheet when the card says that state is on screen. Ten references at most.
 
+**Continuing scenes (Leo's rule).** When scene NN continues scene NN-1 without a cut in
+the edit, scene NN carries **the same reference set as scene NN-1**, in the same order,
+plus whatever newly enters. Drop a handle only when the card says it is gone for good.
+Every object the action touches must be attached: if scene 1 ends with him opening a
+cooler, scene 2 opens on the cooler and the cooler's sheet is attached, or the clip fails.
+An object in the action with no sheet is a reel-back, not something to describe in words:
+report `MISSING SHEET · <thing>` and stop. Start from `scenes/scene-NN-1/video.refs.txt`.
+
 ## Step 1b: the video prompt (`video.prompt.txt`)
 
 ### For Seedance 2.5
@@ -86,6 +94,14 @@ Because no frame is attached, the FIRST FRAME / BLOCKING block does the work a s
 frame used to do: it states the opening state from the card as positions, sides, distances,
 gaze and hands, so the first visible frame is never empty and nobody arrives late. The
 last ACTION beat states the arrival state the same way; there is no end frame to land on.
+
+For a continuing scene the opening state is **what the previous clip actually ended on**,
+not what its card planned: the card's OPENING line was copied from the previous scene's
+`ARRIVAL OBSERVED` (below). Restate it in FIRST FRAME / BLOCKING and lock the carried
+states in POSITIVE LOCKS (the anatomy's block 17: "continuity lives here"): the cooler lid
+already open a hand's width, the same sash height, the wet hair. Leo's diagnosis for a
+sequence that falls apart between shots is: tighten FIRST FRAME / BLOCKING, not the action.
+The block anatomy is `libraries/P-04-Sealed-Prompt-Anatomy.md`.
 
 The workspace may cap prompt length. If your prompt is refused for length, cut blocks the
 shot does not need, never trim a needed block. Report what you cut.
@@ -139,11 +155,26 @@ run the checks:
 - **No invented cuts, no invented dialogue** (if the clip has audio).
 - **No lettering appeared.**
 
+Then write the handoff line. From the clip's last frame, describe what is actually there
+as positions and states, left and right from the camera, in two or three sentences:
+
+```
+ARRIVAL OBSERVED · scene-01 · Nia is out of frame left; the sash is up a hand's width; the
+cat is loafed on the mustard cushion frame-right, head turned toward the door; morning
+light unchanged.
+```
+
+Put it at the top of your report. The main agent copies it into the next scene's card as
+its OPENING line, so the next prompt starts from the clip that exists, not from a plan.
+
 Report per `_contract.md` with the workspace generation URL added, and stop.
 
 ## What you never do
 
-- Never attach a still, an end frame or the storyboard. Sheets only.
+- Never attach a still, an end frame or the storyboard. Sheets only. (Leo's own notes keep
+  last-frame chaining for a true match cut only; that is a per-scene instruction from the
+  user when it happens, never your default.)
+- Never describe in words an object the action touches that has no sheet. Reel back.
 - Never attach a sheet for a handle that is not on screen in this shot.
 - Never submit before a `GO`.
 - Never generate more than one clip per `GO`.

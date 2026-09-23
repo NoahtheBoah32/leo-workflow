@@ -263,7 +263,9 @@ FOV table (degrees only in prompts; the mm column is for choosing):
 
 Source: `libraries/Seedance-Prompt-Architecture.md` (§2 block order, §5 optics, §8 rules,
 §10 pre-flight), `libraries/worked-example/shots/SHOT-001/prompt.md`,
-`libraries/Sources/higgsfield-seedance-clean-SKILL.md`, and
+`libraries/Sources/higgsfield-seedance-clean-SKILL.md`,
+`libraries/P-04-Sealed-Prompt-Anatomy.md` (Leo's seventeen blocks in order, the fixed-shape
+reference line, and the SHOT 014 worked example), and
 `libraries/Skills/CINEDANCE HIGGSFIELD SKILL.md` ("Active references", "Character
 description rule", the 4-D method).
 
@@ -279,6 +281,12 @@ truth for face, body, wardrobe and texture; long prose overwrites it.
 Because no frame is attached, FIRST FRAME / BLOCKING states the opening state as
 positions (so the first frame is occupied and nobody arrives late) and the last ACTION
 beat states the arrival state the same way.
+
+**Continuity between clips (Leo's answer, 2026-09-23).** A continuing scene carries the
+same reference set as the scene before it, cooler included, plus anything new; its FIRST
+FRAME / BLOCKING is the previous clip's `ARRIVAL OBSERVED` restated; and the carried
+states are repeated in POSITIVE LOCKS, the block where the anatomy says continuity lives.
+If a sequence falls apart between shots, tighten FIRST FRAME / BLOCKING, not the action.
 
 Block order. Use only the blocks the scene needs. Opens on SCENE CONTEXT, never a style
 header. CAMERA third among the core layers.
@@ -345,7 +353,9 @@ OUTPUT SETTINGS
 
 POSITIVE LOCKS
 Exactly [n] people. [Identity locks per person, sides stated.] [Rigid elements stay rigid.]
-[Screen direction.] [The forbidden list as positive states.]
+[Screen direction.] [The forbidden list as positive states.] [Continuing scene: the states
+carried from the previous clip, restated: "the cooler lid is already open a hand's width
+from the first frame", "the sash stays up a hand's width throughout".]
 ```
 
 Pre-flight before saving (from the architecture file §10):

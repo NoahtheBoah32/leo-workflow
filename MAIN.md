@@ -465,12 +465,19 @@ Skip this section entirely when the job is in images-only mode (§3.5).
 4. Gate. On a defect that lives in one region, prefer a repair over a reroll (Leo's Phase 6).
    On a defect that lives in a sheet, 4.3b: the sheet, not the clip. Approval copies to
    `video-approved.mp4`.
+5. Take the director's `ARRIVAL OBSERVED` line (what the approved clip actually ends on)
+   and write it into the next scene's card as OPENING. This is how continuity works
+   without frames: the next prompt opens on the clip that exists, with the same
+   reference set attached (Leo: "vid 2's references are the same as vid 1's, cooler
+   included"). If the next scene's action touches an object that has no sheet, that is a
+   reel-back (§3.6) before the next card: make the element sheet first.
 
 ### 5.4 Next scene
 
 Update `STATUS.md`. Report the scene's credits (§4.5, one block). Announce in one line:
-`Scene 01 done. Scene 02 opens on <arrival state in a few words>. Writing the card.` Then
-§5.1 again.
+`Scene 01 done. Scene 02 opens on <ARRIVAL OBSERVED in a few words>. Writing the card.`
+Then §5.1 again, with OPENING copied from ARRIVAL OBSERVED and the reference set carried
+over from `scenes/scene-01/video.refs.txt`.
 
 ---
 
