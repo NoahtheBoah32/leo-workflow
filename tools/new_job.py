@@ -14,7 +14,7 @@ STATUS = """# STATUS · {name}
 |---|---|---|---|---|
 | ground-rules | — | | | |
 | plan | — | | | |
-| video-settings | — | | | |
+| video-settings | — | | | {video} |
 """
 
 GROUND_RULES = """# Ground rules · {name}
@@ -43,6 +43,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("slug")
     ap.add_argument("--date", default=time.strftime("%Y-%m-%d"))
+    ap.add_argument("--images-only", action="store_true", help="write Video: OFF so the video director is never deployed")
     a = ap.parse_args()
     slug = re.sub(r"[^a-z0-9]+", "-", a.slug.lower()).strip("-")
     if not slug:
@@ -55,8 +56,9 @@ def main():
         os.makedirs(os.path.join(job, d))
     io.open(os.path.join(job, "brief.md"), "w", encoding="utf-8").write("# Brief · %s\n\n(paste the user's brief here, verbatim)\n" % name)
     io.open(os.path.join(job, "ground-rules.md"), "w", encoding="utf-8").write(GROUND_RULES.format(name=name))
-    io.open(os.path.join(job, "STATUS.md"), "w", encoding="utf-8").write(STATUS.format(name=name))
-    io.open(os.path.join(job, "plan", "video-settings.txt"), "w", encoding="utf-8").write(VIDEO_SETTINGS)
+    io.open(os.path.join(job, "STATUS.md"), "w", encoding="utf-8").write(STATUS.format(name=name, video="video: OFF" if a.images_only else ""))
+    io.open(os.path.join(job, "plan", "video-settings.txt"), "w", encoding="utf-8").write(
+        ("Video: OFF" + chr(10) if a.images_only else "") + VIDEO_SETTINGS)
     for f in ("characters.md", "environments.md", "elements.md", "scenes.md"):
         io.open(os.path.join(job, "plan", f), "w", encoding="utf-8").write("# %s · %s\n\n" % (f[:-3], name))
     with io.open(os.path.join(job, "log.csv"), "w", encoding="utf-8", newline="") as f:

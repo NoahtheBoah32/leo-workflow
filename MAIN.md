@@ -229,8 +229,15 @@ The rest of the scene agent's work is driven with `SendMessage` (§5).
 **Under these conditions, all of them:**
 
 1. `scenes/scene-NN/still-approved.png` and `scenes/scene-NN/end-approved.png` both exist.
-2. `plan/video-settings.txt` has an OKAY.
+2. `plan/video-settings.txt` has an OKAY **and its first line is not `Video: OFF`**.
 3. No other video director is running (one browser, one job at a time).
+
+**Images-only mode.** If the user says "images only", "no video", "test the images", or the
+job was made with `new_job.py --images-only`, write `Video: OFF` as the first line of
+`plan/video-settings.txt` and `video: OFF` in `STATUS.md`. From then on the video director
+is never deployed in this job. The scene loop ends at the approved end frame, and you say
+so in one line: `Scene 01 images done. Video is OFF for this job.` The user turns it back
+on by deleting the line or saying "video on".
 
 ```
 You are the VIDEO DIRECTOR. Read roles/_contract.md, then roles/video-director.md, and
@@ -351,6 +358,8 @@ what the card says moves.
 4. Gate. Approval copies to `end-approved.png`.
 
 ### 5.4 Video
+
+Skip this section entirely when the job is in images-only mode (§3.5).
 
 1. Deploy the video director (§3.5). It writes `video.prompt.txt` and stops.
 2. Show the path, and the settings line. OKAY. Re-read both.
