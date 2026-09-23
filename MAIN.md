@@ -16,10 +16,10 @@ brief ──► PLAN (files the user can edit) ──► OKAY
                                                   │
         ┌─────────────────────────────────────────┘
         ▼
-   scene 01: card ─► still prompt (GATE) ─► still (GATE) ─► end frame (GATE)
-             ─► video prompt (GATE) ─► Camoufox on the ElevenLabs workspace ─► clip (GATE)
+   scene 01: card ─► storyboard prompt (OKAY) ─► storyboard (GATE, client sign-off only)
+             ─► video prompt + reference list (OKAY) ─► Camoufox: prompt + sheets ─► clip (GATE)
         │
-        └─► scene 02 starts from scene 01's approved end frame ─► ... ─► scene N
+        └─► scene 02 opens on scene 01's arrival state, written into its card ─► ... ─► scene N
 ```
 
 ---
@@ -114,15 +114,20 @@ devices): `@xray_film`, `@red_ribbon`. One handle per state.
 ### 2.3 Scenes
 
 Break the brief into scenes of the chosen length. For each scene, one line: what happens,
-which handles are present (the flattened tag set, nothing else), and whether it is a
-**cut** (new angle or place, generate a fresh still) or a **continuation** (same shot
-carries on, the still is the previous end frame, zero cost).
+which handles are present (the flattened tag set, nothing else), and the **opening state**
+in a few words (who is where, in what state), so that scene NN+1 opens where scene NN
+arrived. No frame is handed between scenes. Continuity lives in the sheets (same faces,
+same room) and in the opening state written into the next card.
 
 Write it to `plan/scenes.md`.
 
 ### 2.4 The prompt files
 
-Write one prompt file per sheet, using `PROMPT-STRUCTURES.md`:
+Write one prompt file per sheet, using `PROMPT-STRUCTURES.md`. Every **human** character
+prompt carries the REALISM block from §1 there, written as positive states (GPT Image 2 has
+no negative field). It is Leo's anti-wax skill: without it GPT Image 2 renders skin waxy and
+airbrushed, and every scene inherits it from the sheet. Animals and objects skip the block.
+The bank is `libraries/realist-portrait/references/` (anti-ai-tells, skin-and-face).
 
 ```
 plan/character-01-doctor.prompt.txt
@@ -139,7 +144,11 @@ Model: Seedance 2.5
 Aspect: 16:9
 Length: 6 seconds
 Resolution: 4k
+Storyboard: ON
 ```
+
+`Storyboard: ON` means every scene gets a storyboard sheet for client sign-off before its
+clip. `OFF` skips it. The storyboard is never attached to the video model either way.
 
 ### 2.5 The PLAN message
 
@@ -156,10 +165,10 @@ Environments (1)
 Elements (1)
   01 @xray_film   plan/element-01-xray_film.prompt.txt
 Scenes (3) · 6 s each · plan/scenes.md
-  01 cut: the doctor turns the film to the light     @doctor @clinic @xray_film
-  02 continuation: the old lady leans in              @doctor @old_lady @clinic
-  03 cut: reverse on the old lady's face              @old_lady @clinic
-Video settings   plan/video-settings.txt   Seedance 2.5 · 16:9 · 6 s · 4k
+  01 the doctor turns the film to the light           @doctor @clinic @xray_film
+  02 the old lady leans in (opens: film held up)      @doctor @old_lady @clinic
+  03 reverse on the old lady's face                   @old_lady @clinic
+Video settings   plan/video-settings.txt   Seedance 2.5 · 16:9 · 6 s · 4k · storyboard ON
 
 Edit any file, then tell me OKAY, or REVISED <TYPE> <NN> for the ones you changed.
 ```
@@ -217,45 +226,56 @@ Same conditions and shape, role `roles/environment-sheet.md`, target `environmen
 
 Same, role `roles/element-sheet.md`, target `element-NN-<handle>`.
 
-### 3.4 Deploy the SCENE SHEET subagent for scene NN
+### 3.4 Deploy the STORYBOARD subagent for scene NN
 
 **Under these conditions, all of them:**
 
 1. Every handle in scene NN's tag set has an APPROVED sheet in `STATUS.md`.
-2. For NN > 01: scene NN-1 has an APPROVED end frame.
-3. `scenes/scene-NN/card.md` exists (you write it, see §5.1).
+2. `scenes/scene-NN/card.md` exists (you write it, see §5.1).
+3. `plan/video-settings.txt` says `Storyboard: ON`. If it says `OFF`, skip this section:
+   the scene goes straight to §3.5.
 
-One scene at a time. Never two scene agents in parallel: scene NN+1 depends on NN's end.
+The storyboard is the client's sign-off image for the scene: a grid of keyframes, one per
+beat. It is **never** attached to the video model. A storyboard shows one angle, and
+attaching it makes the clip worse (Leo tested it). One scene at a time.
 
 ```
-You are the SCENE SHEET agent. Read roles/_contract.md, then roles/scene-sheet.md, and
+You are the STORYBOARD agent. Read roles/_contract.md, then roles/storyboard.md, and
 follow both exactly.
 JOB: jobs/<job>
 TARGET: scene-01
 CARD: scenes/scene-01/card.md
 APPROVED SHEETS: sheets/character-01-doctor/approved.png, sheets/environment-01-clinic/approved.png,
   sheets/element-01-xray_film/approved.png
-PREVIOUS END FRAME: none          (for scene 02+: scenes/scene-01/end-approved.png)
-MODE: cut                         (or: continuation)
 <CONTEXT block>
-Step 1 only: write the still prompt to scenes/scene-01/still.prompt.txt and stop. Do not
-generate until I send GO.
+Step 1 only: write the storyboard prompt to scenes/scene-01/storyboard.prompt.txt and stop.
+Do not generate until I send GO storyboard.
 ```
 
-The rest of the scene agent's work is driven with `SendMessage` (§5).
+The rest of the storyboard agent's work is driven with `SendMessage` (§5).
 
 ### 3.5 Deploy the VIDEO DIRECTOR subagent for scene NN
 
 **Under these conditions, all of them:**
 
-1. `scenes/scene-NN/still-approved.png` and `scenes/scene-NN/end-approved.png` both exist.
-2. `plan/video-settings.txt` has an OKAY **and its first line is not `Video: OFF`**.
-3. No other video director is running (one browser, one job at a time).
+1. Every handle in scene NN's tag set has an APPROVED sheet in `STATUS.md`.
+2. `scenes/scene-NN/card.md` exists.
+3. If `Storyboard: ON`, `scenes/scene-NN/storyboard-approved.png` exists (the client has
+   signed off the scene).
+4. `plan/video-settings.txt` has an OKAY **and its first line is not `Video: OFF`**.
+5. No other video director is running (one browser, one job at a time).
+
+**What the clip is made from.** The prompt, plus the approved sheets attached as
+references. No start frame, no end frame, no storyboard. Leo tested all three: a frame
+pins the model to one image and the motion gets worse; the storyboard shows one angle and
+the clip gets worse. Identity comes from the sheets, everything that happens comes from
+the prompt. The video director decides which sheets the shot needs (§5.3) and returns the
+prompt plus that reference list. Both stop at an OKAY before anything is submitted.
 
 **Images-only mode.** If the user says "images only", "no video", "test the images", or the
 job was made with `new_job.py --images-only`, write `Video: OFF` as the first line of
 `plan/video-settings.txt` and `video: OFF` in `STATUS.md`. From then on the video director
-is never deployed in this job. The scene loop ends at the approved end frame, and you say
+is never deployed in this job. The scene loop ends at the approved storyboard, and you say
 so in one line: `Scene 01 images done. Video is OFF for this job.` The user turns it back
 on by deleting the line or saying "video on".
 
@@ -265,12 +285,12 @@ follow both exactly.
 JOB: jobs/<job>
 TARGET: scene-01
 CARD: scenes/scene-01/card.md
-START FRAME: scenes/scene-01/still-approved.png
-END FRAME: scenes/scene-01/end-approved.png
+APPROVED SHEETS: @doctor sheets/character-01-doctor/approved.png,
+  @clinic sheets/environment-01-clinic/approved.png, @xray_film sheets/element-01-xray_film/approved.png
 SETTINGS: plan/video-settings.txt
 <CONTEXT block>
-Step 1 only: write the video prompt to scenes/scene-01/video.prompt.txt and stop. Do not
-touch the browser until I send GO.
+Step 1 only: write scenes/scene-01/video.refs.txt (the sheets this shot needs, attach order)
+and scenes/scene-01/video.prompt.txt, then stop. Do not touch the browser until I send GO.
 ```
 
 ### 3.6 The reel-back
@@ -305,7 +325,7 @@ Then wait.
 
 ### 4.1 On approval
 
-Copy `vN.png` to `approved.png` (or `still-approved.png`, `end-approved.png`,
+Copy `vN.png` to `approved.png` (or `storyboard-approved.png`,
 `video-approved.mp4`), mark APPROVED in `STATUS.md`, log it.
 
 ### 4.2 On specific feedback
@@ -316,8 +336,8 @@ Route it, do not broadcast it.
 |---|---|
 | one sheet ("the doctor's glasses are wrong") | `SendMessage` to that one agent with the note. It edits its prompt, regenerates, reports. New version number. |
 | a shared property ("all of it is too warm", "the backdrop should be darker grey") | `SendMessage` to every sheet agent in the job with the same note, and update the CONTEXT block for all future spawns |
-| a scene still | the scene agent for that scene |
-| a clip | the video director, unless the defect is in the still, in which case the still is the problem and the scene agent gets it |
+| a storyboard | the storyboard agent for that scene, after the 4.3b diagnosis |
+| a clip | the video director, unless the defect lives in a sheet (4.3b), in which case the sheet agent gets it and the clip waits |
 
 Never regenerate a sheet that was not criticised.
 
@@ -341,20 +361,20 @@ and count it against the reroll budget.
 
 GPT Image 2 obeys the reference image over the prompt text. What a sheet shows is what
 every still and clip will show, and a prompt line cannot argue with it. A grey sweater on
-the sheet stays grey however many times the still prompt says orange. A notch that is not
+the sheet stays grey however many times the storyboard or video prompt says orange. A notch that is not
 clearly visible on the sheet does not exist.
 
 So:
 
-1. **Diagnose before routing.** When a still or an end frame has a defect, ask first: does
+1. **Diagnose before routing.** When a storyboard or a clip has a defect, ask first: does
    this defect live in a sheet? Identity, marks, wardrobe, colour, a prop's shape, a room's
-   architecture, a state such as wet or torn: those live in sheets. If yes, the still is not
+   architecture, a state such as wet or torn: those live in sheets. If yes, the scene is not
    the thing to fix. Send the note to the **sheet** agent, un-approve that sheet in
-   `STATUS.md`, and put the scene on BLOCKED until the sheet is re-approved. Then the scene
-   agent regenerates the still with the new sheet attached. Never send the scene agent a
-   note about something a sheet controls.
-2. **Two strikes on the same defect in a still means it is not the still.** If the same
-   thing is wrong twice in a row, stop rerolling the still, whatever the prompt says. Go
+   `STATUS.md`, and put the scene on BLOCKED until the sheet is re-approved. Then the
+   scene's agent regenerates with the new sheet attached. Never send a scene agent a note
+   about something a sheet controls.
+2. **Two strikes on the same defect means it is not the scene.** If the same thing is
+   wrong twice in a row, stop rerolling the storyboard or clip, whatever the prompt says. Go
    to the sheet.
 3. **A sheet is approved against the registry, item by item.** Before you put a sheet at a
    gate, and before you mark it APPROVED, check every lock in `plan/characters.md` (or
@@ -368,13 +388,14 @@ So:
    to add the panel.
 5. **A change of look is a new sheet, never an edit request.** Orange sweater, wet fur, coat
    off: `character-03-<handle>_<state>`, generated from the base sheet as reference with the
-   one change stated, and approved on its own. Never ask a still to make the change.
-6. **The default answer to "fix it in the still" is no**, unless the defect is one the
+   one change stated, and approved on its own. Never ask a storyboard or a clip to make
+   the change.
+6. **The default answer to "fix it in the scene" is no**, unless the defect is one the
    sheets do not control: framing, blocking, the count of people, an extra object, light
-   direction, lettering that appeared. Those go to the scene agent.
+   direction, lettering that appeared. Those go to the storyboard agent or the video director.
 
-The cost of this rule is one sheet reroll. The cost of ignoring it is every still and
-clip that character is in.
+The cost of this rule is one sheet reroll. The cost of ignoring it is every storyboard
+and clip that character is in.
 
 ### 4.4 Reroll budget
 
@@ -382,59 +403,74 @@ Track rerolls per item in `STATUS.md`. When an item hits the budget from the gro
 say so and ask whether to raise it or simplify the ask. Leo's rule holds: after repeated
 failures, simplify the shot, not the words.
 
+### 4.5 Credits: milestone reports only
+
+Every run logs its credits in `log.csv` (`gen_image.py` reads the account counter before
+and after; `browser_video.py` reads the workspace display when its selector is mapped).
+Subagents put the number in their report to you. **You never relay it per image.** The
+user does not want a credit figure under every gate. You report credits at exactly these
+milestones, by running the tally and pasting its block unchanged:
+
+| Milestone | Command |
+|---|---|
+| every sheet in the plan is APPROVED | `python tools/credits.py --job jobs/<job> --scope sheets` |
+| a scene's images are done (storyboard approved, or clip approved when video is on) | `python tools/credits.py --job jobs/<job> --scope scene-NN` |
+| the job closes (§6) | `python tools/credits.py --job jobs/<job> --scope all` |
+
+The block says what was spent, what was kept, what was thrown away (the versions named)
+and what failed attempts cost. If the block lists runs with no credit figure, ask the user
+for the numbers from the workspace once, at that milestone, and write them into `log.csv`.
+Never ask for them one run at a time.
+
 ---
 
 ## 5. The per-scene loop
 
-Scenes are sequential. Finish scene 01 through its clip before scene 02 starts. Scene NN+1
-begins from scene NN's approved end frame.
+Scenes are sequential. Finish scene 01 through its clip before scene 02 starts. Nothing is
+handed from one scene to the next but words: scene NN+1's card opens on the state scene
+NN arrived at, and the same sheets carry the same faces and rooms.
 
 ### 5.1 Write the scene card (you do this, no generation)
 
 `scenes/scene-NN/card.md`, the shape in `PROMPT-STRUCTURES.md` §5. It holds the motion map
 (locked / moves / decided), the director's brief (intent, lead, supporting, ambient, what
 the camera does, pace), the look picks named internally, the lens resolved to a FOV degree
-step, the flattened tag set, and the dialogue with its exact word count. Use
-`libraries/director-dp.md` as the method and the camera libraries as the menu. Named
-picks stop on the card. They never reach a prompt.
+step, the flattened tag set, the beats with their times, the opening and arrival states as
+positions, and the dialogue with its exact word count. Use `libraries/director-dp.md` as
+the method and the camera libraries as the menu. Named picks stop on the card. They never
+reach a prompt.
 
-### 5.2 Still
+### 5.2 Storyboard (client sign-off; skip when `Storyboard: OFF`)
 
-1. Deploy the scene agent (§3.4). It writes `still.prompt.txt` and stops.
+1. Deploy the storyboard agent (§3.4). It writes `storyboard.prompt.txt` and stops.
 2. Show the path. The user edits or says OKAY. Re-read the file.
-3. `SendMessage` the scene agent: `GO still`. It generates `still-v1.png` and reports.
-4. Gate. Feedback goes back by `SendMessage`. Approval copies to `still-approved.png`.
+3. `SendMessage` the storyboard agent: `GO storyboard`. It generates `storyboard-v1.png`
+   and reports.
+4. Gate. Feedback goes back by `SendMessage`, after the 4.3b diagnosis. Approval copies to
+   `storyboard-approved.png`.
 
-For a **continuation** scene, skip 1 to 4: copy the previous `end-approved.png` to
-`still-approved.png` and say so.
+The storyboard is for the client and for the user's own eyes. It goes in no generation.
 
-### 5.3 End frame
-
-The end frame is an edit of the approved still. It is never generated fresh. The room and
-the face stay identical because the still is reference image 1 and the prompt changes only
-what the card says moves.
-
-1. `SendMessage` the scene agent: `write end prompt`. It writes `end.prompt.txt` from the
-   card's arrival state and stops.
-2. Show the path. OKAY. Re-read.
-3. `SendMessage`: `GO end`. It generates `end-v1.png` and reports.
-4. Gate. Approval copies to `end-approved.png`.
-
-### 5.4 Video
+### 5.3 Clip
 
 Skip this section entirely when the job is in images-only mode (§3.5).
 
-1. Deploy the video director (§3.5). It writes `video.prompt.txt` and stops.
-2. Show the path, and the settings line. OKAY. Re-read both.
-3. `SendMessage`: `GO`. It drives the browser, submits with both frames, waits, downloads
-   `video-v1.mp4`, and reports the workspace URL of the generation.
+1. Deploy the video director (§3.5). It writes `video.refs.txt` (which sheets this shot
+   needs, in attach order, strongest first, off-screen handles left out) and
+   `video.prompt.txt`, and stops.
+2. Show both paths and the settings line, plus one line saying which handles from the tag
+   set it left out and why. OKAY. Re-read all of it.
+3. `SendMessage`: `GO`. It drives the browser, uploads the sheets in `video.refs.txt`,
+   pastes the prompt, waits, downloads `video-v1.mp4`, and reports the workspace URL.
 4. Gate. On a defect that lives in one region, prefer a repair over a reroll (Leo's Phase 6).
-   Approval copies to `video-approved.mp4`.
+   On a defect that lives in a sheet, 4.3b: the sheet, not the clip. Approval copies to
+   `video-approved.mp4`.
 
-### 5.5 Next scene
+### 5.4 Next scene
 
-Update `STATUS.md`. Announce in one line: `Scene 01 done. Scene 02 starts from
-scenes/scene-01/end-approved.png. Writing the card.` Then §5.1 again.
+Update `STATUS.md`. Report the scene's credits (§4.5, one block). Announce in one line:
+`Scene 01 done. Scene 02 opens on <arrival state in a few words>. Writing the card.` Then
+§5.1 again.
 
 ---
 
@@ -445,13 +481,19 @@ When the last clip is approved:
 - `STATUS.md` shows every item APPROVED with its version.
 - `log.csv` has every run from #1, approved or not.
 - Say where the clips are and how many rerolls the job spent against the budget, in two lines.
+- Run `python tools/credits.py --job jobs/<job> --scope all` and paste the block: total
+  spent (images and videos), kept, thrown away with the versions named, failed, and any
+  runs with no credit figure so the user can fill them in.
 - Do not assemble, grade or mix. The edit is the user's.
 
 ---
 
 ## 7. Things you never do
 
-- Never generate a sheet, still, end frame or clip yourself. Deploy.
+- Never generate a sheet, storyboard or clip yourself. Deploy.
+- Never attach a still, an end frame or the storyboard to a video generation. Sheets only.
+- Never report credits per image. Milestones only (§4.5).
+- Never write a human character sheet prompt without the REALISM block (§2.4).
 - Never deploy a scene agent while a sheet in its tag set is unapproved, without the reel-back.
 - Never run two scene agents or two video directors at once.
 - Never send a subagent feedback the user did not give.

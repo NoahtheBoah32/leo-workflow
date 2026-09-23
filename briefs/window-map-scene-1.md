@@ -47,18 +47,18 @@ difference between his run and ours; keep it small and visible.
 `--res 1K`, `--quality high` for all six. His storyboard and stills were 1536 × 1024, so the
 scene still runs at `--aspect 3:2`, `--res 2K`.
 
-## Scene 1 still and end frame
+## Scene 1 storyboard
 
 - Card: build it from `libraries/worked-example/shots/SHOT-001/card.md`. Copy the motion
-  map, the brief and the look picks as they are. Duration 6 s. Arrival state: the end of
-  beat 2 (Nia has kissed his head, the sash is up a hand's width, she is turning to leave
-  frame-left).
-- Still prompt: derive from `libraries/worked-example/shots/SHOT-001/storyboard.md`. Use its
-  REFERENCES block as the role-scoped reference lines (six images, same order), and its
-  top-left panel description as the first frame. Attach the six approved sheets in the
-  order the storyboard numbers them.
-- End frame: an edit of the approved still per `roles/scene-sheet.md`. Change only the
-  arrival state above.
+  map, the brief and the look picks as they are. Duration 6 s. Beats: the first two of the
+  storyboard's four panels. Arrival state: the end of beat 2 (Nia has kissed his head, the
+  sash is up a hand's width, she is turning to leave frame-left).
+- Storyboard prompt: derive from `libraries/worked-example/shots/SHOT-001/storyboard.md`.
+  Use its REFERENCES block as the role-scoped reference lines (six images, same order) and
+  its panels as the beats. Attach the six approved sheets in the order the storyboard
+  numbers them. The storyboard is the client's sign-off image only; it is never attached
+  to a video generation.
+- No still, no end frame. Frames are out of the pipeline.
 
 ## Comparison
 

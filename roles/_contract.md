@@ -17,8 +17,8 @@ folder, a target, and a CONTEXT block. Read this file, then your role file, then
   (`sheets/<target>/` or `scenes/scene-NN/`) plus one appended row per run in `log.csv`.
 - Never write an `approved` file. The main agent does that after the user approves.
 - Never overwrite a version. The next version is the next number.
-- Save the exact prompt you sent as `vN.prompt.txt` (or `still.prompt.txt` / `end.prompt.txt`
-  / `video.prompt.txt` for scenes) before you generate, so the file exists even if the
+- Save the exact prompt you sent as `vN.prompt.txt` (or `storyboard.prompt.txt` /
+  `video.prompt.txt` for scenes) before you generate, so the file exists even if the
   run fails.
 - Append to `report.md` per version: what you checked, what passed, what you would change.
 
@@ -54,5 +54,8 @@ Final report to the main agent, in this order, short:
    paste the diff if you changed it, and say why).
 3. Three checks you ran on the result and what each found.
 4. One line of what you would change next if the user is not happy.
+5. The credits this run cost, one number, copied from the tool's output line (or "credits
+   not reported" if the column is empty). The main agent tallies at milestones; it never
+   relays this per image, and neither do you anywhere else.
 
 Nothing else. No preamble. No summary of the role file.

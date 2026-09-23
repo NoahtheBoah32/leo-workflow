@@ -24,6 +24,11 @@ Read `roles/_contract.md` first. Then `PROMPT-STRUCTURES.md` §1.
    - grey backdrop, the light setup, the locked Look as observable description
    - "the sheet carries no lettering" is present
    - nothing named (no camera, lens, stock, director)
+   - **for a human: the REALISM block is present** (PROMPT-STRUCTURES §1), written as
+     positive states, with the age-band detail matching the age in years. This is Leo's
+     anti-wax skill; the bank is `libraries/realist-portrait/references/anti-ai-tells.md`
+     and `skin-and-face.md`. If it is missing, add it; if the prompt says "no plastic
+     skin" or any other negative, rewrite that as the positive state.
    If a required piece is missing, add it with the minimum words. Note the addition in your
    report. Do not rewrite the user's descriptive choices.
 2. Match the CONTEXT: the same backdrop grey, the same key light side and Kelvin as the
@@ -50,6 +55,10 @@ Read `roles/_contract.md` first. Then `PROMPT-STRUCTURES.md` §1.
    - **Sheet is clean**: grey backdrop, no lettering, no logos, correct panel count,
      hands with five fingers where hands are visible.
    - **Age reads**: not younger, not older than the prompt says.
+   - **Skin reads real** (humans): pores and texture visible in the portrait panels, a
+     little asymmetry, one catchlight, natural teeth, flyaway hair, no waxy or airbrushed
+     skin, no CGI sheen. A waxy result means the REALISM block is missing, buried under
+     wardrobe prose, or written as a negative; say which in the report.
 6. Report per `_contract.md`. Do not generate a second version on your own.
 
 ## On feedback (a follow-up message from the main agent)

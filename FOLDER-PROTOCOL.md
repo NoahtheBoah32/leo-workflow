@@ -19,12 +19,12 @@ jobs/2026-09-22-clinic/
 │  ├─ characters.md                 the Persistent Characters registry (@handles)
 │  ├─ environments.md
 │  ├─ elements.md
-│  ├─ scenes.md                     one line per scene: action · tag set · cut | continuation
+│  ├─ scenes.md                     one line per scene: action · tag set · opening state
 │  ├─ character-01-doctor.prompt.txt
 │  ├─ character-02-old_lady.prompt.txt
 │  ├─ environment-01-clinic.prompt.txt
 │  ├─ element-01-xray_film.prompt.txt
-│  └─ video-settings.txt            Model / Aspect / Length / Resolution, four lines
+│  └─ video-settings.txt            Model / Aspect / Length / Resolution / Storyboard, five lines
 │
 ├─ sheets/                          one folder per sheet, named exactly like its prompt file
 │  ├─ character-01-doctor/
@@ -35,15 +35,13 @@ jobs/2026-09-22-clinic/
 │  ├─ environment-01-clinic/
 │  └─ element-01-xray_film/
 │
-└─ scenes/                          sequential. scene-02 cannot exist before scene-01 has end-approved.png
+└─ scenes/                          sequential. scene-02 is not started before scene-01's clip is approved
    ├─ scene-01/
-   │  ├─ card.md                    motion map · brief · look picks (internal) · FOV step · tags · dialogue count
-   │  ├─ still.prompt.txt           the scene still prompt (references the approved sheets by role)
-   │  ├─ still-v1.png  still-v2.png
-   │  ├─ still-approved.png
-   │  ├─ end.prompt.txt             an EDIT of the approved still. Never a fresh generation.
-   │  ├─ end-v1.png
-   │  ├─ end-approved.png
+   │  ├─ card.md                    motion map · brief · look picks (internal) · FOV step · tags · beats · opening/arrival states · dialogue count
+   │  ├─ storyboard.prompt.txt      the storyboard prompt (references the approved sheets by role). Client sign-off only.
+   │  ├─ storyboard-v1.png  storyboard-v2.png
+   │  ├─ storyboard-approved.png    NEVER attached to a video generation
+   │  ├─ video.refs.txt             the sheets this shot needs: "@handle  sheets/<sheet>/approved.png", attach order
    │  ├─ video.prompt.txt           the sealed video prompt
    │  ├─ video-v1.mp4
    │  ├─ video-approved.mp4
@@ -107,8 +105,15 @@ States: `—` (not started) · `PLANNED` · `RUNNING` · `GATE` · `APPROVED` ·
 Header, written by `new_job.py`. One row per generation, appended by whichever agent ran it.
 
 ```
-run,date,time,item,version,model,prompt_file,refs,settings,output,status,seconds,note
-1,2026-09-22,14:03:10,character-01-doctor,v1,gpt-image-2,sheets/character-01-doctor/v1.prompt.txt,,3:2 1K high,sheets/character-01-doctor/v1.png,completed,61,
+run,date,time,item,version,model,prompt_file,refs,settings,output,status,seconds,note,credits,gen_id
+1,2026-09-22,14:03:10,character-01-doctor,v1,gpt-image-2,sheets/character-01-doctor/v1.prompt.txt,,3:2 1K high,sheets/character-01-doctor/v1.png,completed,61,,320,dDypIHDmmP9K1un0gODC
 ```
 
 Run #1 is logged whatever happened to it. A failed run is a row too.
+
+`credits` is what the run cost: `gen_image.py` reads the account counter before and after;
+`browser_video.py` reads the workspace display when its `credits_text` selector is mapped,
+otherwise the cell is empty and the tally (`tools/credits.py`) lists the run for the user
+to fill in. `gen_id` is the generation id (API) or the workspace URL (browser). The tally
+decides kept versus thrown away by comparing each run's output with the approved file
+byte for byte, so never edit an approved copy by hand.

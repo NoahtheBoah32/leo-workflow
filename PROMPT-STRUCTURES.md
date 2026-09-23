@@ -22,8 +22,10 @@ the workspace has an elements panel; if it does not, write the name in words).
 
 ## 1. Character sheet (GPT Image 2 · 3:2 six-panel, or 16:9 three-panel · 1K high)
 
-Source: `libraries/realist-portrait-SKILL.md` Mode C, `libraries/Prompt-Archive/character-sheet.md`
-#12, `libraries/worked-example/canvas/characters/@nia/prompt.md`.
+Source: `libraries/realist-portrait/SKILL.md` Mode C and its `references/` (Leo's anti-wax
+skill: `anti-ai-tells.md`, `skin-and-face.md`, `wardrobe-hair-grooming.md`),
+`libraries/Prompt-Archive/character-sheet.md` #12,
+`libraries/worked-example/canvas/characters/@nia/prompt.md`.
 
 One prose block. Order matters. Every line is load-bearing.
 
@@ -36,8 +38,17 @@ The same individual in every panel, consistent facial identity across all frames
 [IDENTITY]  a [age]-year-old [woman/man] of [concrete heritage], [skin tone with undertone],
 [age markers: lines, creases, texture]; [face geometry: shape, nose, eyes, brows, chin,
 lips]; [distinguishing marks, each with "her own left / his own right"]; [hair: colour,
-texture, cut, flyaways]; [build]; [facial hair or makeup]. Visible pores, natural asymmetry
-between the eyes and brows, subsurface warmth in the ears.
+texture, cut, flyaways]; [build]; [facial hair or makeup].
+
+[REALISM, human characters only]  Natural skin texture with visible pores, fine vellus
+hair catching the light, faint uneven tone and a little surface shine on the forehead,
+nose and chin, no digital smoothing; soft subsurface warmth where light passes through
+the ears, nostrils and lip edges; natural facial asymmetry, one eye a little smaller,
+brows at slightly different heights; [the age-band detail from skin-and-face.md §3, e.g.
+"faint expression lines at the outer eyes, natural under-eye tone variation"]; eyes with
+visible iris fibre, a darker limbal ring, natural moisture in the inner corner and one
+catchlight only; natural teeth, not uniformly white; hair with a few flyaways and a
+slightly uneven hairline; fine even film grain in the midtones and shadows.
 
 [WARDROBE, one state]  [garment: fabric, fit, condition] over [garment], [trousers],
 [shoes], [carried item on which shoulder or hand]. Fabric reads real: [one wear detail].
@@ -60,6 +71,14 @@ shadows, forgiving mid-contrast, slightly lifted blacks."]
 ```
 
 Rules:
+- **The anti-wax rule.** GPT Image 2 renders human skin waxy, airbrushed and symmetrical
+  by default, and every scene inherits the sheet. So every human sheet carries the
+  REALISM block, and it is written as positive states only: there is no negative field,
+  and "no plastic skin" summons plastic skin. Pull the phrasing from
+  `libraries/realist-portrait/references/anti-ai-tells.md` (the positive-side column of
+  the table) and `skin-and-face.md` (§1 texture, §2 asymmetry, §3 age band, §5 eyes).
+  Pick one or two marks, not five. Animals and objects skip the block; the same idea for
+  them is "fur with individual guard hairs", "paint with brush marks and dust".
 - Grey. Grey tested better than white or black for video reference.
 - Face view plus full-body front and back in one generation, so the model never guesses.
 - One state per sheet. `_wet`, `_wound`, `_coat_off` are separate sheets.
@@ -138,15 +157,22 @@ Rules:
 
 ---
 
-## 4. Scene still (GPT Image 2 · job aspect · 2K high · up to 10 references)
+## 4. Scene storyboard (GPT Image 2 · 3:2 · 1K high · up to 10 references · client sign-off only)
 
-Source: `libraries/Prompt-Archive/element-product.md` #2 and #3 (role-scoped references),
-`libraries/worked-example/shots/SHOT-001/storyboard.md` (the REFERENCES block), the FIRST
-FRAME / BLOCKING and LOCATION MAP blocks of the sealed prompt.
+Source: `libraries/worked-example/shots/SHOT-001/storyboard.md` (the whole prompt),
+`libraries/Prompt-Archive/element-product.md` #2 and #3 (role-scoped references).
+
+The storyboard is a grid of keyframes, one per beat on the card, in time order. The client
+signs the scene off on it. **It is never attached to the video model.** It shows one
+camera angle and it drags the clip toward that one image; Leo tested it and the clip got
+worse. The clip is made from the prompt plus the sheets (§6).
 
 ```
-[ONE-LINE SCENE CONTEXT]  A photographic film still, [aspect], of one instant: [who, where,
-doing what, in one sentence].
+A storyboard sheet of [n] photographic keyframes from one continuous moment of a short
+live-action film, laid out as a [2 x 2] grid on a [3:2] landscape canvas. Each panel is a
+[job aspect] frame with a thin warm-cream border and even gutters; the panels read
+top-left, top-right, bottom-left, bottom-right, in time order. The sheet carries no
+lettering, numbers, captions or labels anywhere[; the only legible character is ...].
 
 REFERENCES
 Image 1 is [character]. It controls [face, hair, marks, wardrobe]. Ignore [its grey backdrop
@@ -154,43 +180,31 @@ and panel layout].
 Image 2 is [environment]. It controls [the room, the anchors, the light direction]. Ignore
 [its emptiness].
 Image 3 is [element]. It controls [the object's identity and size]. Ignore [its surface].
-Image 4 is the last frame of the previous scene. It controls [positions, states such as
-wetness, what is held]. Ignore [its framing].            ← cut mode, scene 02+
 
-LOCATION MAP
-Foreground: [...]. Midground: [...]. Background: [...]. The camera is [where, relative to
-an anchor], at [height]. [Light source] enters from [side].
-
-FIRST FRAME / BLOCKING
-[Person A] [where in frame, which third], [facing which way], [distance to the camera in
-metres], [gaze], [hands]. [Person B] [...]. [Object] [where]. Left and right are from the
-camera.
-
-OPTICS
-[Framing term as description: "wide shot easing to medium" is a video term; a still says
-"medium shot, waist up"], [FOV]-degree field of view, rectilinear, [focus: which layer is
-sharp, which soft].
+PANELS
+Top-left — [beat 1 as one instant: shot size, camera position relative to an anchor, who
+is where, which third, facing which way, gaze, hands. Left and right from the camera.]
+Top-right — [beat 2 ...]
+Bottom-left — [beat 3 ...]
+Bottom-right — [beat 4, the arrival state ...]
 
 LIGHT
-[Restate the environment sheet's light: source, side, Kelvin, shadow character.] Exposure
-set for [the subject].
+[Restate the environment sheet's light: source, side, Kelvin, shadow character.]
 
-PALETTE AND LOOK
-[Hex line as material plus light.] [LOOK as observable description.]
-
-LOCKS
-Exactly [n] people in frame. [Every forbidden-list item as a positive state: "shop fronts
-and papers carry no readable lettering", "the only legible character is the numeral 7 on
-the bus".] [Identity locks per person: "the doctor keeps the wire glasses and the mole
-under his own left eye".]
+STYLE
+Photoreal live-action film stills. [LOOK as observable description.] All panels share the
+same camera position logic, the same light and the same characters. [Palette hex as
+material plus light.] [The forbidden list as positive states.] Exactly [n] people.
+[Identity locks per person, sides stated.]
 ```
 
 Rules:
-- One reference per element that must stay consistent. Attach only the handles in this
-  scene's tag set. A cluttered set is less coherent than a small chosen one.
+- One panel per beat, never more panels than the card has beats. Four is the usual.
+- Attach only the handles in this scene's tag set. A cluttered set is less coherent than
+  a small chosen one.
 - Role-scope each attachment: what it controls and what to ignore, or the model inherits
   the grey backdrop and the panel gutters.
-- The still is an instant, not an action. Write the opening frame.
+- 1K. Nobody but the client and the user reads it, and it feeds nothing.
 
 ---
 
@@ -200,7 +214,7 @@ Source: `libraries/Seedance-Feature-Pipeline.md` Phase 3, `libraries/director-dp
 `libraries/worked-example/shots/SHOT-001/card.md`.
 
 ```
-SCENE 01  ·  [place, time]  ·  [oner | sequential | timed]  ·  6 s  ·  [cut | continuation]
+SCENE 01  ·  [place, time]  ·  [oner | sequential | timed]  ·  6 s
 
 TAGS PRESENT      @doctor, @old_lady, @clinic, @xray_film       (nothing else)
 MOTION  locked    [rigid elements: walls, desk, window, the monitor image]
@@ -215,8 +229,12 @@ LOOK    movement  [Camera-Movements-Library name — internal only]
         focus     [Depth-of-Field-Library term — internal only]
         capture   [Camera-Look-Library term — internal only]
         look+stance  [the locked pair from ground-rules.md]
-BLOCKING start    [who is where at frame one, left/right from camera, distances, gaze]
-ARRIVAL   end     [who is where at the last frame; this is what the end frame edit changes]
+BEATS             [0.0–2.0 s beat · 2.0–4.0 s beat · 4.0–6.0 s beat]  (one storyboard panel each)
+OPENING  start    [who is where at frame one, left/right from camera, distances, gaze, hands;
+                   for scene 02+ this is the previous scene's arrival state, in words]
+ARRIVAL   end     [who is where at the last frame, as positions; the last ACTION beat states it]
+ATTACH            [the handles this shot needs on screen, strongest first; the video director
+                   confirms this list in video.refs.txt]
 DIALOGUE          @old_lady — "[line]" — exactly [n] words ([from]–[to] s)   or   none, silence intentional
 AUDIO             [ambience bed, foreground foley]. No music.
 ```
@@ -241,11 +259,26 @@ FOV table (degrees only in prompts; the mm column is for choosing):
 
 ## 6. Video prompt
 
-### 6.1 Seedance 2.5 (sealed prompt, both frames attached)
+### 6.1 Seedance 2.5 (sealed prompt; the approved sheets attached as references; no frames)
 
 Source: `libraries/Seedance-Prompt-Architecture.md` (§2 block order, §5 optics, §8 rules,
 §10 pre-flight), `libraries/worked-example/shots/SHOT-001/prompt.md`,
-`libraries/Sources/higgsfield-seedance-clean-SKILL.md`.
+`libraries/Sources/higgsfield-seedance-clean-SKILL.md`, and
+`libraries/Skills/CINEDANCE HIGGSFIELD SKILL.md` ("Active references", "Character
+description rule", the 4-D method).
+
+**What is attached.** The approved sheets the shot needs, and nothing else. No start
+frame, no end frame, no storyboard: Leo tested them and the clip gets worse. The video
+director decides which sheets by walking the card's tag set with the CINEDANCE rule (a
+reference is attached only if the thing must be visible or required in this exact shot)
+and writes the result to `video.refs.txt`, one handle and one path per line, attach order,
+strongest first. ACTIVE REFERENCES in the prompt lists exactly those handles, in the
+CINEDANCE form, minimum anchors, "100% matches the reference". The sheet is the source of
+truth for face, body, wardrobe and texture; long prose overwrites it.
+
+Because no frame is attached, FIRST FRAME / BLOCKING states the opening state as
+positions (so the first frame is occupied and nobody arrives late) and the last ACTION
+beat states the arrival state the same way.
 
 Block order. Use only the blocks the scene needs. Opens on SCENE CONTEXT, never a style
 header. CAMERA third among the core layers.
@@ -265,7 +298,9 @@ Foreground: [...]. Midground: [...]. Background: [...]. The camera is [where] at
 [Light] enters from [side].
 
 FIRST FRAME / BLOCKING
-Matches the attached start frame exactly: [restate the blocking in one or two sentences].
+[The opening state from the card as positions: who is where, which third, facing which
+way, distance in metres, gaze, hands. Left and right from the camera. The first visible
+frame is occupied by these people in these places; nobody arrives late.]
 
 FORMAT MODE
 One continuous shot; the camera does not cut on its own.    (or the timed multishot form
@@ -284,7 +319,7 @@ ACTION
 Camera: [the move above, continuous from 0.0 s to 6.0 s].
 0.0–2.0 s — [beat, measured].
 2.0–4.0 s — [beat].
-4.0–6.0 s — [beat]. The final frame matches the attached end frame exactly.
+4.0–6.0 s — [beat]. [The arrival state from the card, as positions.]
 
 PERFORMANCE
 [Muscle movement, not emotion labels: "jaw tight, eyes fixed on the film, a slow blink".]
@@ -318,7 +353,9 @@ blocks in order · tags only for present objects · no style prefix at the top �
 positive except STYLE and AUDIO exclusions · speeds in km/h, atmosphere in % and metres ·
 emotion as muscle movement · left/right from the camera · FOV in degrees from the table ·
 CAMERA third · white balance in Kelvin · colour as material plus light · dialogue word
-count stated as a lock · no banned name anywhere · no block cut to hit a number.
+count stated as a lock · no banned name anywhere · no block cut to hit a number · every
+@tag in ACTIVE REFERENCES has a line in `video.refs.txt` and every line there has a tag ·
+no still, end frame or storyboard in the attachment list.
 
 ### 6.2 Kling (positive + negative, ≤ 1500 characters combined)
 
@@ -334,7 +371,8 @@ Negative: [only what this shot tends to get wrong: "camera cutting on its own, e
 people, warped hands, lettering resolving on the film, whole-frame red cast, CGI look"]
 ```
 
-Camera-led shots go to Seedance. Element-led shots are where Kling earns a run.
+The same `video.refs.txt` sheets are attached. Camera-led shots go to Seedance.
+Element-led shots are where Kling earns a run.
 
 ---
 

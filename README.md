@@ -6,9 +6,10 @@ role files. The human approves in the chat. The operating path is:
 ```
 brief → PLAN files (edit in Notepad) → OKAY
       → character / environment / element sheets   (GPT Image 2, parallel, ~60 s each)
-      → per scene: still → end frame (an edit of the still) → clip
-        (Seedance 2.5 in the ElevenLabs web workspace, driven by Camoufox)
-      → next scene starts from this scene's end frame
+      → per scene: storyboard (client sign-off, optional) → clip
+        (prompt + the approved sheets as references; Seedance 2.5 in the ElevenLabs
+        web workspace, driven by Camoufox; no start or end frame, no storyboard attached)
+      → next scene opens on this scene's arrival state, written into its card
 ```
 
 There is no ComfyUI in this path. The ComfyUI rig in the parent folder is the spec and
@@ -21,13 +22,15 @@ the demo; this folder is the operation.
 | `CLAUDE.md` | tells Claude Code it is the main agent and what to read |
 | `MAIN.md` | the main agent's manual: intake, plan, deploy conditions, gates, feedback routing, the scene loop |
 | `FOLDER-PROTOCOL.md` | the job folder layout and the naming law |
-| `PROMPT-STRUCTURES.md` | the shape of every prompt (sheets, scene still, end frame, scene card, Seedance, Kling) |
+| `PROMPT-STRUCTURES.md` | the shape of every prompt (sheets with the anti-wax REALISM block, storyboard, scene card, Seedance, Kling) |
 | `roles/_contract.md` | rules every subagent follows |
 | `roles/character-sheet.md` · `environment-sheet.md` · `element-sheet.md` | the sheet makers |
-| `roles/scene-sheet.md` | combines approved sheets into the still and the end frame |
-| `roles/video-director.md` | writes the video prompt and drives the browser |
+| `roles/storyboard.md` | combines approved sheets into the client's storyboard sheet (never a video reference) |
+| `roles/video-director.md` | picks the sheets the shot needs, writes the video prompt, drives the browser |
+| `libraries/realist-portrait/` | Leo's anti-wax skill and its reference banks |
 | `tools/gen_image.py` | one GPT Image 2 call, saved and logged (stdlib only) |
-| `tools/browser_video.py` | Camoufox: `login` once by hand, `inspect` to map the UI, `submit` a clip |
+| `tools/browser_video.py` | Camoufox: `login` once by hand, `inspect` to map the UI, `submit` a clip with the sheets attached |
+| `tools/credits.py` | the credit tally per milestone (sheets, a scene, the whole job): spent, kept, thrown away, failed |
 | `tools/new_job.py` | job folder skeleton |
 | `libraries/` | the AI Production craft kit: prompt architecture, camera libraries, prompt archive, a worked example |
 | `jobs/` | one folder per job (gitignored) |
@@ -76,7 +79,7 @@ generate without an OKAY, type a password, or print a key.
 | Item | Model | Setting | Measured |
 |---|---|---|---|
 | character / environment / element sheet | gpt-image-2 | 1K high | about 60 s |
-| scene still, end frame | gpt-image-2 | 2K high | about 120 s |
+| storyboard | gpt-image-2 | 1K high | about 60 s |
 | clip | Seedance 2.5 in the workspace | per `video-settings.txt` | workspace dependent |
 
 Sheets run in parallel, so a three-sheet job is one minute of waiting, not three.

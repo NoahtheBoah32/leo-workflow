@@ -35,8 +35,8 @@ Read `roles/_contract.md` first. Then `PROMPT-STRUCTURES.md` §2.
    python tools/gen_image.py --job jobs/<job> --item <target> --version N \
        --prompt-file sheets/<target>/vN.prompt.txt --aspect 16:9 --res 1K --quality high
    ```
-   Use 2K only if the main agent's spawn prompt says the plate will be used as a start frame
-   directly.
+   Use 2K only if the main agent's spawn prompt asks for it (a client deliverable). The
+   plate is a reference, never a start frame.
 5. Look at the image. Checks for `report.md`:
    - **Angle and depth**: three-quarter, two walls read, the three depth layers read.
    - **Anchors present** and on the stated side.

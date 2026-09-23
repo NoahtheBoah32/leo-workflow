@@ -7,7 +7,12 @@
 
 Paths are relative to the pipeline root (the folder holding this tools/ directory) or absolute.
 If --out is omitted the image lands at <job>/sheets/<item>/v<version>.png, or, for items named
-scene-NN-still / scene-NN-end, at <job>/scenes/scene-NN/<still|end>-v<version>.png.
+scene-NN-storyboard, at <job>/scenes/scene-NN/storyboard-v<version>.png.
+
+Credits: the tool reads the account's used-credit counter (GET /v1/user/subscription, free) before
+the request and again after the image lands, and logs the difference in the `credits` column of
+log.csv. If the counter has not moved within ten seconds the row says 0 with the note
+"credits: no delta reported" so the tally can flag it. The generation id is logged too.
 
 The key is loaded from, in order: the ELEVENLABS_API_KEY environment variable, a .env file in the
 pipeline root, then ../API-KEYS.local.md (a private file outside the repo). It is never printed.
@@ -16,7 +21,7 @@ Standard library only. Model is gpt-image-2 and cannot be changed from the comma
 Exit codes: 0 saved · 1 bad arguments or missing file · 4 request rejected (nothing charged) ·
 5 generation failed (not charged) · 6 poll timeout.
 """
-import argparse, base64, csv, io, json, os, sys, time, urllib.request, urllib.error
+import argparse, base64, csv, io, json, os, re, sys, time, urllib.request, urllib.error
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE = "https://api.elevenlabs.io/v1"
@@ -70,28 +75,56 @@ def call(key, method, path, body=None, timeout=120):
 
 
 def default_out(job, item, version):
-    if item.startswith("scene-") and (item.endswith("-still") or item.endswith("-end")):
-        scene, what = item.rsplit("-", 1)
-        return os.path.join(job, "scenes", scene, "%s-v%d.png" % (what, version))
+    m = re.match(r"^(scene-\d\d)-([a-z]+)$", item)
+    if m:
+        return os.path.join(job, "scenes", m.group(1), "%s-v%d.png" % (m.group(2), version))
     return os.path.join(job, "sheets", item, "v%d.png" % version)
 
 
+HEADER = ["run", "date", "time", "item", "version", "model", "prompt_file", "refs",
+          "settings", "output", "status", "seconds", "note", "credits", "gen_id"]
+
+
 def log_row(job, row):
+    """Append one row. Upgrades an older log.csv (no credits/gen_id columns) in place."""
     logp = os.path.join(job, "log.csv")
-    new = not os.path.exists(logp)
-    run = 1
-    if not new:
+    rows = []
+    if os.path.exists(logp):
         with io.open(logp, encoding="utf-8", newline="") as f:
-            rows = list(csv.reader(f))
-        nums = [int(r[0]) for r in rows[1:] if r and r[0].isdigit()]
-        run = (max(nums) + 1) if nums else 1
+            rows = [r for r in csv.reader(f) if r]
+    if rows and rows[0] != HEADER:
+        rows = [HEADER] + [r + [""] * (len(HEADER) - len(r)) for r in rows[1:]]
+        with io.open(logp, "w", encoding="utf-8", newline="") as f:
+            csv.writer(f).writerows(rows)
+    nums = [int(r[0]) for r in rows[1:] if r[0].isdigit()]
+    run = (max(nums) + 1) if nums else 1
+    row = row + [""] * (len(HEADER) - 1 - len(row))
     with io.open(logp, "a", encoding="utf-8", newline="") as f:
         w = csv.writer(f)
-        if new:
-            w.writerow(["run", "date", "time", "item", "version", "model", "prompt_file", "refs",
-                        "settings", "output", "status", "seconds", "note"])
+        if not rows:
+            w.writerow(HEADER)
         w.writerow([run] + row)
     return run
+
+
+def credits_used(key):
+    """The account's used-credit counter, or None if the endpoint did not answer."""
+    st, body = call(key, "GET", "/user/subscription", timeout=30)
+    if st == 200 and isinstance(body, dict) and isinstance(body.get("character_count"), int):
+        return body["character_count"]
+    return None
+
+
+def credits_delta(key, before):
+    """Poll the counter for up to ten seconds after a generation; returns (delta, note)."""
+    if before is None:
+        return "", "credits: counter unavailable"
+    for _ in range(5):
+        after = credits_used(key)
+        if after is not None and after != before:
+            return after - before, ""
+        time.sleep(2)
+    return 0, "credits: no delta reported"
 
 
 def main():
@@ -146,12 +179,13 @@ def main():
     key = load_key()
     if refs:
         body["images"] = [b64ref(r) for r in refs]
+    before = credits_used(key)
     t0 = time.time()
     status, resp = call(key, "POST", "/flows/image", body)
     if status != 200:
         msg = json.dumps(resp, ensure_ascii=False) if not isinstance(resp, str) else resp
         log_row(job, [time.strftime("%Y-%m-%d"), time.strftime("%H:%M:%S"), a.item, "v%d" % a.version, MODEL,
-                      rel(prompt_path), ";".join(rel(r) for r in refs), settings, "", "rejected %s" % status, 0, msg[:200]])
+                      rel(prompt_path), ";".join(rel(r) for r in refs), settings, "", "rejected %s" % status, 0, msg[:200], 0, ""])
         print("rejected (nothing charged), HTTP %s: %s" % (status, msg[:600]))
         sys.exit(4)
     gen_id = resp["id"]
@@ -165,23 +199,26 @@ def main():
             break
         if time.time() > deadline:
             log_row(job, [time.strftime("%Y-%m-%d"), time.strftime("%H:%M:%S"), a.item, "v%d" % a.version, MODEL,
-                          rel(prompt_path), ";".join(rel(r) for r in refs), settings, "", "timeout", int(time.time() - t0), gen_id])
+                          rel(prompt_path), ";".join(rel(r) for r in refs), settings, "", "timeout", int(time.time() - t0), "", "", gen_id])
             sys.exit(6)
         time.sleep(interval)
         interval = min(interval * 1.5, 20)
     secs = int(time.time() - t0)
     if s != "completed":
         reason = "%s: %s" % (body2.get("failure_reason"), body2.get("error_message"))
+        delta, cnote = credits_delta(key, before)
         log_row(job, [time.strftime("%Y-%m-%d"), time.strftime("%H:%M:%S"), a.item, "v%d" % a.version, MODEL,
-                      rel(prompt_path), ";".join(rel(r) for r in refs), settings, "", "failed", secs, reason[:200]])
-        print("generation failed (not charged):", reason)
+                      rel(prompt_path), ";".join(rel(r) for r in refs), settings, "", "failed", secs, reason[:200], delta, gen_id])
+        print("generation failed (credits charged: %s):" % delta, reason)
         sys.exit(5)
     data = urllib.request.urlopen(body2["content_url"], timeout=300).read()
     with open(out, "wb") as f:
         f.write(data)
+    delta, cnote = credits_delta(key, before)
+    note = (a.note + " " + cnote).strip()
     run = log_row(job, [time.strftime("%Y-%m-%d"), time.strftime("%H:%M:%S"), a.item, "v%d" % a.version, MODEL,
-                        rel(prompt_path), ";".join(rel(r) for r in refs), settings, rel(out), "completed", secs, a.note])
-    print("saved %s  (%d KB, %d s, run #%d)" % (out, len(data) // 1024, secs, run))
+                        rel(prompt_path), ";".join(rel(r) for r in refs), settings, rel(out), "completed", secs, note, delta, gen_id])
+    print("saved %s  (%d KB, %d s, run #%d, credits: %s)" % (out, len(data) // 1024, secs, run, delta))
 
 
 if __name__ == "__main__":

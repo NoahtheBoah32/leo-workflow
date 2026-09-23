@@ -36,6 +36,7 @@ VIDEO_SETTINGS = """Model: Seedance 2.5
 Aspect: 16:9
 Length: 6 seconds
 Resolution: 4k
+Storyboard: ON
 """
 
 
@@ -63,7 +64,7 @@ def main():
         io.open(os.path.join(job, "plan", f), "w", encoding="utf-8").write("# %s · %s\n\n" % (f[:-3], name))
     with io.open(os.path.join(job, "log.csv"), "w", encoding="utf-8", newline="") as f:
         csv.writer(f).writerow(["run", "date", "time", "item", "version", "model", "prompt_file", "refs",
-                                "settings", "output", "status", "seconds", "note"])
+                                "settings", "output", "status", "seconds", "note", "credits", "gen_id"])
     print("created", job.replace("\\", "/"))
 
 

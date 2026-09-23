@@ -38,9 +38,12 @@ only. It skips the questions it already answers.
 4. Sheets generate in parallel, one subagent each, GPT Image 2, about a minute.
 5. Each image stops at a **GATE** in the chat with its path. Open it, then say **approve**
    or say what is wrong. Vague feedback gets three questions before anything regenerates.
-6. Scene 01: it writes the card, then the still prompt (OKAY), the still (gate), the end
-   frame prompt (OKAY), the end frame (gate). Then scene 02 from scene 01's end frame.
-7. With `images only`, it stops there and says so.
+6. Scene 01: it writes the card, then the storyboard prompt (OKAY), the storyboard (gate;
+   this is the client's sign-off image, it is never fed to the video model). Then the video
+   prompt plus the list of sheets to attach (OKAY), then the clip (gate). Then scene 02.
+7. With `images only`, it stops at the storyboard and says so.
+8. Credits are reported at milestones only: when all sheets are approved, when a scene is
+   done, and at the end with what was kept and what was thrown away.
 
 ## Where things land
 
@@ -48,7 +51,7 @@ only. It skips the questions it already answers.
 jobs\<date>-<slug>\
   plan\          the files you edit
   sheets\        character-01-doctor\v1.png, approved.png ...
-  scenes\        scene-01\still-v1.png, end-v1.png ...
+  scenes\        scene-01\storyboard-v1.png, video.refs.txt, video-v1.mp4 ...
   STATUS.md      what is approved, what is waiting
   log.csv        every run
 ```

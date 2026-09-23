@@ -17,17 +17,22 @@ Map the workspace once (the UI is not documented; selectors are learned, not gue
 Submit a clip (what the video director runs on GO):
     python tools/browser_video.py submit --job jobs/<job> --item scene-01 --version 1 \
         --model seedance-2.5 --prompt-file scenes/scene-01/video.prompt.txt \
-        --start scenes/scene-01/still-approved.png --end scenes/scene-01/end-approved.png \
+        --ref sheets/character-01-doctor/approved.png --ref sheets/environment-01-clinic/approved.png \
         --aspect 16:9 --duration 6 --resolution 4k --out scenes/scene-01/video-v1.mp4
+
+    No start frame, no end frame. The clip is made from the prompt plus the approved SHEETS attached
+    as references (--ref, repeatable, order kept, strongest first). Frames were tested and they make
+    the output worse; so does attaching the storyboard.
 
 What submit does, in order, and nothing else:
     1. open the workspace URL in the persistent profile          (exit 3 if a sign-in form shows)
     2. switch to video, pick the model                            (exit 2 if a selector is missing)
     3. set aspect, duration, resolution; nearest lower option if the exact one is absent (printed)
-    4. upload the start frame, then the end frame
+    4. upload the reference sheets, in the order given
     5. paste the prompt, click generate
     6. wait for the result (up to --wait minutes), download to --out, print the generation URL
-    7. append a row to <job>/log.csv
+    7. append a row to <job>/log.csv, with the credits the workspace showed as spent when the
+       optional credits_text selector is mapped (otherwise the credits column stays empty)
 Every step waits like a person would. One attempt per call. A failure screenshots to
 <job>/scenes/<item>/browser-fail-v<version>.png and exits non-zero with the reason.
 
@@ -57,8 +62,8 @@ SELECTOR_TEMPLATE = {
     "duration_option_prefix": None,
     "resolution_picker": None,
     "resolution_option_prefix": None,
-    "start_frame_input": None,         # input[type=file] for the first frame
-    "end_frame_input": None,           # input[type=file] for the last frame
+    "reference_input": None,           # input[type=file] that takes the reference images (the sheets)
+    "credits_text": None,              # optional: element whose text shows the remaining credits
     "prompt_box": None,                # textarea or contenteditable
     "generate_button": None,
     "result_video": None,              # <video> element of the newest generation
@@ -197,6 +202,7 @@ def log_row(job, row):
         with io.open(logp, encoding="utf-8", newline="") as f:
             nums = [int(r[0]) for r in list(csv.reader(f))[1:] if r and r[0].isdigit()]
         run = (max(nums) + 1) if nums else 1
+    row = row + [""] * (14 - len(row))
     with io.open(logp, "a", encoding="utf-8", newline="") as f:
         csv.writer(f).writerow([run] + row)
     return run
@@ -204,8 +210,11 @@ def log_row(job, row):
 
 def cmd_submit(a):
     job = resolve(a.job)
-    prompt_path, start, end, out = resolve(a.prompt_file), resolve(a.start), resolve(a.end), resolve(a.out)
-    for p in (prompt_path, start, end):
+    prompt_path, out = resolve(a.prompt_file), resolve(a.out)
+    refs = [resolve(r) for r in a.ref]
+    if not refs:
+        sys.exit("no --ref given: a clip is made from the prompt plus the approved sheets as references")
+    for p in [prompt_path] + refs:
         if not os.path.exists(p):
             sys.exit("missing: " + p)
     if os.path.exists(out):
@@ -222,6 +231,19 @@ def cmd_submit(a):
     settings = "%s %s %ss %s" % (a.model, a.aspect, a.duration, a.resolution)
     t0 = time.time()
     gen_url = ""
+    credits_before = None
+    refs_col = ";".join(os.path.relpath(r, job).replace("\\", "/") for r in refs)
+
+    def read_credits(page):
+        """Remaining credits as shown in the workspace when credits_text is mapped; else None."""
+        if not sel.get("credits_text"):
+            return None
+        try:
+            txt = page.locator(sel["credits_text"]).first.inner_text()
+            digits = "".join(ch for ch in txt if ch.isdigit())
+            return int(digits) if digits else None
+        except Exception:
+            return None
 
     def fail(code, why):
         try:
@@ -229,7 +251,7 @@ def cmd_submit(a):
         except Exception:
             pass
         log_row(job, [time.strftime("%Y-%m-%d"), time.strftime("%H:%M:%S"), a.item, "v%d" % a.version, a.model,
-                      rel(prompt_path), rel(start) + ";" + rel(end), settings, "", why.split(":")[0], int(time.time() - t0), why[:200]])
+                      rel(prompt_path), refs_col, settings, "", why.split(":")[0], int(time.time() - t0), why[:200], "", ""])
         print(why, "| screenshot:", fail_shot)
         sys.exit(code)
 
@@ -253,8 +275,8 @@ def cmd_submit(a):
         res_candidates = RES_ORDER[RES_ORDER.index(r):] if r in RES_ORDER else [r]
         pick_option(page, sel, "resolution_picker", "resolution_option_prefix", r, res_candidates)
 
-        page.locator(need(sel, "start_frame_input")).set_input_files(start); pause(1.5, 3)
-        page.locator(need(sel, "end_frame_input")).set_input_files(end); pause(1.5, 3)
+        credits_before = read_credits(page)
+        page.locator(need(sel, "reference_input")).set_input_files(refs); pause(2, 4)
 
         box = page.locator(need(sel, "prompt_box")).first
         box.click(); pause()
@@ -282,6 +304,7 @@ def cmd_submit(a):
                 gen_url = page.locator(sel["generation_link"]).first.get_attribute("href") or ""
             except Exception:
                 gen_url = ""
+        credits_after = read_credits(page)
         try:
             with page.expect_download(timeout=120000) as dl:
                 page.locator(need(sel, "download_button")).first.click()
@@ -292,9 +315,14 @@ def cmd_submit(a):
                 f.write(data)
 
     secs = int(time.time() - t0)
+    credits, note = "", gen_url
+    if credits_before is not None and credits_after is not None:
+        credits = credits_before - credits_after
+    else:
+        note = (gen_url + " credits: not readable in the workspace, fill log.csv by hand").strip()
     run = log_row(job, [time.strftime("%Y-%m-%d"), time.strftime("%H:%M:%S"), a.item, "v%d" % a.version, a.model,
-                        rel(prompt_path), rel(start) + ";" + rel(end), settings, rel(out), "completed", secs, gen_url])
-    print("saved %s  (%d s, run #%d)  %s" % (out, secs, run, gen_url))
+                        rel(prompt_path), refs_col, settings, rel(out), "completed", secs, note, credits, gen_url])
+    print("saved %s  (%d s, run #%d, credits: %s)  %s" % (out, secs, run, credits if credits != "" else "?", gen_url))
 
 
 def main():
@@ -308,8 +336,7 @@ def main():
     s.add_argument("--version", type=int, required=True)
     s.add_argument("--model", default="seedance-2.5", help="key of model_option in selectors.json")
     s.add_argument("--prompt-file", required=True)
-    s.add_argument("--start", required=True)
-    s.add_argument("--end", required=True)
+    s.add_argument("--ref", action="append", default=[], help="reference sheet, repeatable, order kept, strongest first")
     s.add_argument("--aspect", default="16:9")
     s.add_argument("--duration", type=int, default=6)
     s.add_argument("--resolution", default="4k")
