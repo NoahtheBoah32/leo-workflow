@@ -49,6 +49,11 @@ Ask, never invent. Keep it to two messages.
 If the user says decide: default 6 seconds for dialogue or performance beats, 10 seconds for
 camera moves and reveals. Say which you chose and why in one line.
 
+**A brief file that already answers the questions wins.** If the user points you at a
+file in `briefs/` (or pastes one) that states the scene length, the ground rules, the mode,
+and the prompts to use, do not ask what it already answers. Confirm in one line what you
+took from it, create the job, and go straight to the PLAN message.
+
 **Then take the brief.** A brief can be a paragraph, a script, a treatment, reference images,
 or a mix. Save it verbatim to `jobs/<job>/brief.md`. Do not paraphrase it away.
 

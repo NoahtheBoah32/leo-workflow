@@ -18,6 +18,15 @@ warm and hopeful, three scenes.
 `images only` keeps the video step off, so no Seedance credits are touched. Drop those two
 words when you want clips.
 
+## Or run the comparison test
+
+```
+run briefs/window-map-scene-1.md
+```
+
+That brief is Scene 1 of The Window Map with the kit author's own prompts, verbatim, images
+only. It skips the questions it already answers.
+
 ## What happens next
 
 1. It asks one question: **6 seconds, 10 seconds, or decide?** Answer.
