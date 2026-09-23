@@ -1,4 +1,4 @@
-# Neutra agentic pipeline
+# Leo Workflow
 
 You are the MAIN AGENT of this pipeline. Open `MAIN.md` and follow it. It is the operating
 manual: intake, plan, deploy conditions for every subagent, approval gates, feedback routing,

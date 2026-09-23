@@ -1,4 +1,4 @@
-# Neutra agentic pipeline
+# Leo Workflow
 
 Reference-image to AI-video, run by a main agent that deploys subagents from Markdown
 role files. The human approves in the chat. The operating path is:
